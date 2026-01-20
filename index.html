@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Mobile - Simulation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* ========== RESET & BASE STYLES ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #ff0000, #ffffff);
+            min-height: 100vh;
+            color: #333;
+            padding-top: 56px;
+            padding-bottom: 120px;
+            transition: background-color 0.3s;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(to bottom, #cc0000, #0f0f0f);
+            color: #f1f1f1;
+        }
+
+        /* ========== HEADER STYLES ========== */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            transition: background-color 0.3s;
+        }
+
+        .dark-mode header {
+            background-color: #202020;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .logo {
+            color: #ff0000;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            color: #333;
+        }
+
+        .dark-mode .logo span {
+            color: #f1f1f1;
+        }
+
+        /* Tombol pencarian di header (pojok kanan atas) */
+        .search-header-btn {
+            font-size: 20px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+            margin-left: auto;
+        }
+
+        .search-header-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode .search-header-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ========== CATEGORY BAR STYLES ========== */
+        .category-bar {
+            position: sticky;
+            top: 56px;
+            left: 0;
+            right: 0;
+            background-color: #ffffff;
+            padding: 12px 16px;
+            overflow-x: auto;
+            white-space: nowrap;
+            z-index: 90;
+            transition: background-color 0.3s;
+            
+            /* Menambahkan scrollbar untuk kategori */
+            scrollbar-width: thin;
+            scrollbar-color: #ff0000 #f1f1f1;
+        }
+
+        /* Scrollbar untuk Chrome, Safari, dan Edge */
+        .category-bar::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .category-bar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .category-bar::-webkit-scrollbar-thumb {
+            background-color: #ff0000;
+            border-radius: 3px;
+        }
+
+        .dark-mode .category-bar {
+            background-color: #202020;
+        }
+
+        .dark-mode .category-bar::-webkit-scrollbar-track {
+            background: #333;
+        }
+
+        .dark-mode .category-bar::-webkit-scrollbar-thumb {
+            background-color: #ff4444;
+        }
+
+        .category-container {
+            display: flex;
+            gap: 12px;
+            min-width: min-content; /* Memastikan kontainer tidak memaksa item untuk wrap */
+        }
+
+        .category {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background-color: #f1f1f1;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0; /* Mencegah kategori menyusut */
+        }
+
+        .category:hover {
+            background-color: #e1e1e1;
+        }
+
+        .category.active {
+            background-color: #333;
+            color: #ffffff;
+        }
+
+        .dark-mode .category {
+            background-color: #373737;
+            color: #f1f1f1;
+        }
+
+        .dark-mode .category:hover {
+            background-color: #474747;
+        }
+
+        .dark-mode .category.active {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+
+        /* ========== VIDEO CONTAINER STYLES ========== */
+        .video-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 20px 16px;
+        }
+
+        @media (min-width: 640px) {
+            .video-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .video-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .video-card {
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .video-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark-mode .video-card {
+            background-color: #282828;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .video-info {
+            padding: 12px;
+        }
+
+        .video-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-channel {
+            font-size: 14px;
+            color: #606060;
+            margin-bottom: 4px;
+        }
+
+        .dark-mode .video-channel {
+            color: #aaa;
+        }
+
+        .video-stats {
+            font-size: 14px;
+            color: #606060;
+        }
+
+        .dark-mode .video-stats {
+            color: #aaa;
+        }
+
+        /* ========== BOTTOM NAVIGATION STYLES ========== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #e1e1e1;
+            z-index: 100;
+            transition: background-color 0.3s;
+        }
+
+        .dark-mode .bottom-nav {
+            background-color: #202020;
+            border-top: 1px solid #333;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            text-decoration: none;
+            color: #606060;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            flex: 1;
+            height: 100%;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode .nav-item {
+            color: #aaa;
+        }
+
+        .dark-mode .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            color: #ff0000;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* ========== SEARCH OVERLAY STYLES ========== */
+        .search-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 80px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .search-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .search-box {
+            width: 90%;
+            max-width: 600px;
+            background-color: #ffffff;
+            border-radius: 24px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .dark-mode .search-box {
+            background-color: #373737;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            background-color: transparent;
+        }
+
+        .dark-mode .search-input {
+            color: #f1f1f1;
+        }
+
+        .search-close {
+            font-size: 24px;
+            cursor: pointer;
+            color: #606060;
+        }
+
+        .dark-mode .search-close {
+            color: #aaa;
+        }
+
+        /* ========== FOOTER STYLES ========== */
+        footer {
+            text-align: center;
+            padding: 20px 16px;
+            color: #ff0000;
+            font-size: 14px;
+            border-top: 1px solid rgba(255, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        /* ========== THEME TOGGLE STYLES ========== */
+        .theme-toggle {
+            position: fixed;
+            top: 70px;
+            right: 16px;
+            z-index: 80;
+            background-color: #333;
+            color: #ffffff;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .dark-mode .theme-toggle {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+
+        /* ========== LOADING ANIMATION ========== */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ff0000;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========== UTILITY CLASSES ========== */
+        .hidden {
+            display: none;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== HEADER ========== -->
+    <header>
+        <div class="logo-container">
+            <div class="logo">You<span>Tube</span></div>
+        </div>
+        <!-- Tombol pencarian di pojok kanan atas -->
+        <div class="search-header-btn" id="search-header-btn">
+            🔍
+        </div>
+    </header>
+
+    <!-- ========== CATEGORY BAR ========== -->
+    <div class="category-bar">
+        <div class="category-container">
+            <button class="category active" data-category="all">Semua</button>
+            <button class="category" data-category="game">Game</button>
+            <button class="category" data-category="live">Live</button>
+            <button class="category" data-category="podcast">Podcast</button>
+            <button class="category" data-category="sitkom">Sitkom</button>
+            <button class="category" data-category="music">Musik</button>
+            <button class="category" data-category="tech">Teknologi</button>
+            <button class="category" data-category="sport">Olahraga</button>
+            <button class="category" data-category="news">Berita</button>
+            <button class="category" data-category="education">Edukasi</button>
+            <button class="category" data-category="comedy">Komedi</button>
+            <button class="category" data-category="cooking">Memasak</button>
+        </div>
+    </div>
+
+    <!-- ========== VIDEO CONTAINER ========== -->
+    <main class="video-container" id="video-container">
+        <!-- Video akan dirender di sini oleh JavaScript -->
+    </main>
+
+    <!-- ========== FOOTER ========== -->
+    <footer>
+        &copy; 2026 - Only for Simulation Purposes
+    </footer>
+
+    <!-- ========== BOTTOM NAVIGATION ========== -->
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" data-page="home">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Home</span>
+        </a>
+        <a href="#" class="nav-item" data-page="shorts">
+            <span class="nav-icon">🎬</span>
+            <span class="nav-label">Shorts</span>
+        </a>
+        <a href="#" class="nav-item" data-page="profile">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">Profile</span>
+        </a>
+    </nav>
+
+    <!-- ========== SEARCH OVERLAY ========== -->
+    <div class="search-overlay" id="search-overlay">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="Cari di YouTube...">
+            <div class="search-close" id="search-close">✕</div>
+        </div>
+        <div style="color: white; text-align: center; padding: 20px;">
+            <p>Fitur pencarian simulasi. Tekan Enter untuk mencari.</p>
+        </div>
+    </div>
+
+    <!-- ========== THEME TOGGLE BUTTON ========== -->
+    <button class="theme-toggle" id="theme-toggle">Mode Gelap</button>
+
+    <script>
+        // ========== DATA VIDEO (SIMULASI) ==========
+        const videoData = [
+            {
+                id: 1,
+                title: "Tutorial JavaScript untuk Pemula - Part 1",
+                channel: "Web Dev Channel",
+                views: "245K",
+                time: "2 minggu lalu",
+                category: "tech",
+                thumbnail: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 2,
+                title: "Gameplay Mobile Legends: Bang Bang",
+                channel: "Gaming Pro",
+                views: "1.2M",
+                time: "1 hari lalu",
+                category: "game",
+                thumbnail: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 3,
+                title: "Live Streaming: Konser Musik Indie",
+                channel: "Indie Music Live",
+                views: "45K",
+                time: "Sedang Live",
+                category: "live",
+                thumbnail: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 4,
+                title: "Podcast Teknologi: Masa Depan AI",
+                channel: "Tech Talks",
+                views: "89K",
+                time: "3 hari lalu",
+                category: "podcast",
+                thumbnail: "https://images.unsplash.com/photo-1589903308904-1010c2294adc?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 5,
+                title: "Sitkom: Kehidupan Keluarga Modern",
+                channel: "Comedy Network",
+                views: "3.5M",
+                time: "1 bulan lalu",
+                category: "sitkom",
+                thumbnail: "https://images.unsplash.com/photo-1551818255-e6e10975bc17?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 6,
+                title: "Lagu Pop Terbaru 2026",
+                channel: "Music Hits",
+                views: "5.7M",
+                time: "5 hari lalu",
+                category: "music",
+                thumbnail: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 7,
+                title: "Review Smartphone Terbaru 2026",
+                channel: "Tech Review",
+                views: "780K",
+                time: "1 minggu lalu",
+                category: "tech",
+                thumbnail: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 8,
+                title: "Highlight Pertandingan Sepak Bola",
+                channel: "Sport Channel",
+                views: "2.3M",
+                time: "2 hari lalu",
+                category: "sport",
+                thumbnail: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 9,
+                title: "Tutorial Desain Web Responsif",
+                channel: "Design Master",
+                views: "150K",
+                time: "3 minggu lalu",
+                category: "tech",
+                thumbnail: "https://images.unsplash.com/photo-1545235617-9465d2a55698?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 10,
+                title: "Game Baru: Cyber Adventure 2077",
+                channel: "Game News",
+                views: "890K",
+                time: "6 jam lalu",
+                category: "game",
+                thumbnail: "https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 11,
+                title: "Berita Teknologi Hari Ini",
+                channel: "Tech News",
+                views: "320K",
+                time: "4 jam lalu",
+                category: "news",
+                thumbnail: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 12,
+                title: "Belajar Matematika Dasar",
+                channel: "Edu Channel",
+                views: "540K",
+                time: "1 bulan lalu",
+                category: "education",
+                thumbnail: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80"
+            }
+        ];
+
+        // ========== ELEMEN DOM ==========
+        const videoContainer = document.getElementById('video-container');
+        const categories = document.querySelectorAll('.category');
+        const navItems = document.querySelectorAll('.nav-item');
+        const searchHeaderBtn = document.getElementById('search-header-btn'); // Tombol pencarian di header
+        const searchOverlay = document.getElementById('search-overlay');
+        const searchClose = document.getElementById('search-close');
+        const searchInput = document.querySelector('.search-input');
+        const themeToggle = document.getElementById('theme-toggle');
+
+        // ========== STATE APLIKASI ==========
+        let currentCategory = 'all';
+        let currentPage = 'home';
+        let isDarkMode = false;
+
+        // ========== FUNGSI INISIALISASI ==========
+        function init() {
+            renderVideos();
+            setupEventListeners();
+            setupCategoryScroll();
+        }
+
+        // ========== FUNGSI RENDER VIDEO ==========
+        function renderVideos() {
+            videoContainer.innerHTML = '';
+            
+            // Filter video berdasarkan kategori
+            const filteredVideos = currentCategory === 'all' 
+                ? videoData 
+                : videoData.filter(video => video.category === currentCategory);
+            
+            // Buat kartu video untuk setiap video yang difilter
+            filteredVideos.forEach(video => {
+                const videoCard = document.createElement('div');
+                videoCard.className = 'video-card';
+                
+                videoCard.innerHTML = `
+                    <img src="${video.thumbnail}" alt="${video.title}" class="thumbnail">
+                    <div class="video-info">
+                        <h3 class="video-title">${video.title}</h3>
+                        <p class="video-channel">${video.channel}</p>
+                        <p class="video-stats">${video.views} ditonton • ${video.time}</p>
+                    </div>
+                `;
+                
+                // Tambahkan event klik ke kartu video
+                videoCard.addEventListener('click', () => {
+                    showVideoAlert(video.title);
+                });
+                
+                videoContainer.appendChild(videoCard);
+            });
+            
+            // Jika tidak ada video yang ditemukan
+            if (filteredVideos.length === 0) {
+                videoContainer.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📺</div>
+                        <h3 style="margin-bottom: 12px;">Tidak ada video ditemukan</h3>
+                        <p style="color: #606060;">Coba pilih kategori lain</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ========== FUNGSI SETUP EVENT LISTENERS ==========
+        function setupEventListeners() {
+            // Tombol kategori
+            categories.forEach(category => {
+                category.addEventListener('click', () => {
+                    // Hapus kelas aktif dari semua kategori
+                    categories.forEach(cat => cat.classList.remove('active'));
+                    
+                    // Tambahkan kelas aktif ke kategori yang diklik
+                    category.classList.add('active');
+                    
+                    // Perbarui kategori saat ini dan render ulang video
+                    currentCategory = category.getAttribute('data-category');
+                    renderVideos();
+                });
+            });
+            
+            // Item navigasi
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    // Hapus kelas aktif dari semua item navigasi
+                    navItems.forEach(navItem => navItem.classList.remove('active'));
+                    
+                    // Tambahkan kelas aktif ke item navigasi yang diklik
+                    item.classList.add('active');
+                    
+                    // Perbarui halaman saat ini
+                    currentPage = item.getAttribute('data-page');
+                    
+                    // Tampilkan pesan untuk perubahan halaman
+                    showPageAlert(currentPage);
+                });
+            });
+            
+            // Tombol pencarian di header
+            searchHeaderBtn.addEventListener('click', () => {
+                searchOverlay.classList.add('active');
+                searchInput.focus();
+            });
+            
+            // Tombol tutup pencarian
+            searchClose.addEventListener('click', () => {
+                searchOverlay.classList.remove('active');
+            });
+            
+            // Input pencarian
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const query = searchInput.value.trim();
+                    if (query) {
+                        showSearchAlert(query);
+                        searchOverlay.classList.remove('active');
+                        searchInput.value = '';
+                    }
+                }
+            });
+            
+            // Toggle tema
+            themeToggle.addEventListener('click', toggleTheme);
+            
+            // Tutup overlay pencarian saat klik di luar kotak pencarian
+            searchOverlay.addEventListener('click', (e) => {
+                if (e.target === searchOverlay) {
+                    searchOverlay.classList.remove('active');
+                }
+            });
+        }
+
+        // ========== FUNGSI SETUP SCROLLBAR KATEGORI ==========
+        function setupCategoryScroll() {
+            const categoryBar = document.querySelector('.category-bar');
+            
+            // Pastikan scrollbar selalu terlihat di mobile
+            categoryBar.addEventListener('mouseenter', () => {
+                categoryBar.style.scrollbarWidth = 'thin';
+            });
+            
+            categoryBar.addEventListener('mouseleave', () => {
+                // Biarkan scrollbar tetap terlihat di mobile
+                categoryBar.style.scrollbarWidth = 'thin';
+            });
+            
+            // Auto-scroll ke kategori aktif jika perlu
+            const activeCategory = document.querySelector('.category.active');
+            if (activeCategory) {
+                activeCategory.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }
+
+        // ========== FUNGSI TOGGLE THEME ==========
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            themeToggle.textContent = isDarkMode ? 'Mode Terang' : 'Mode Gelap';
+        }
+
+        // ========== FUNGSI UTILITY ALERT ==========
+        function showVideoAlert(title) {
+            alert(`Memutar video: ${title}\n\nIni hanya simulasi. Di aplikasi nyata, video akan diputar.`);
+        }
+
+        function showPageAlert(page) {
+            let pageTitle = '';
+            switch(page) {
+                case 'home':
+                    pageTitle = 'Beranda';
+                    break;
+                case 'shorts':
+                    pageTitle = 'Shorts';
+                    break;
+                case 'profile':
+                    pageTitle = 'Profil';
+                    break;
+            }
+            
+            alert(`Navigasi ke halaman: ${pageTitle}\n\nIni hanya simulasi. Di aplikasi nyata, ini akan menampilkan konten yang sesuai.`);
+        }
+
+        function showSearchAlert(query) {
+            alert(`Mencari: "${query}"\n\nIni hanya simulasi. Di aplikasi nyata, ini akan menampilkan hasil pencarian.`);
+        }
+
+        // ========== INISIALISASI APLIKASI ==========
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
