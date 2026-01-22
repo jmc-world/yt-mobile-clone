@@ -1,4 +1,4 @@
-# MIE GACOAN TYCOON SIMULATOR
+# Youtube Mobile Clone
 Simulasi Tampilan Youtube jika versi Mobile dibuat tanpa iklan di atas header.
 
 _Discalimer : Semua fungsi hanyalah demonstrasi semata dan sebagai prototype bagaimana youtube seolah-olah remodernisasi._
